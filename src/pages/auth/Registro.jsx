@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom"
+
 const Registro = () => {
   return (
     <>
@@ -292,13 +294,8 @@ const Registro = () => {
             {/* Login Link */}
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                ¿Ya tienes una cuenta?
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 hover:text-blue-500 underline"
-                >
-                  Inicia sesión aquí
-                </a>
+                ¿Ya tienes una cuenta?{" "}
+                <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500 underline">Inicia sesión aquí</Link>
               </p>
             </div>
           </form>
