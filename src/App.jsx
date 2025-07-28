@@ -4,6 +4,8 @@ import Home from "./pages/Home"
 import Registro from "./pages/auth/Registro"
 import Login from "./pages/auth/Login"
 import OlvidePassword from "./pages/auth/OlvidePassword"
+import AdminLayout from "./layout/AdminLayout"
+import Admin from "./pages/admin/Admin"
 
 // import {} from ''
 function App() {
@@ -19,8 +21,8 @@ function App() {
             <Route path="olvide-password" element={<OlvidePassword />} />
           </Route>
 
-          <Route>
-
+          <Route path="home" element={<AdminLayout />}>
+            <Route index element={<Admin />} />
           </Route>
         </Routes>
       </BrowserRouter>

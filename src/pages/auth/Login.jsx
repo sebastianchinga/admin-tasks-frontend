@@ -330,10 +330,7 @@ const Login = () => {
             </div>
           </form>
           {/* Demo Credentials */}
-          <div
-            className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4 cursor-pointer hover:bg-blue-100 transition-colors"
-            id="demoCredentials"
-          >
+          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4 cursor-pointer hover:bg-blue-100 transition-colors">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg

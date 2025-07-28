@@ -299,6 +299,8 @@ const Registro = () => {
               </p>
             </div>
           </form>
+
+          
         </div>
       </div>
 
