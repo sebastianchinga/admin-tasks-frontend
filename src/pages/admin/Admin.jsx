@@ -8,7 +8,7 @@ const Admin = () => {
 
     const { abrirModal, cerrarModal, modal } = useModal();
     const { tareas, setFiltro, guardarTarea } = useTarea();
-    
+
     const [titulo, setTitulo] = useState('');
     const [descripcion, setDescripcion] = useState('');
 
@@ -29,6 +29,10 @@ const Admin = () => {
         setDescripcion('')
         setAlerta({})
         cerrarModal()
+    }
+
+    const calcularProgreso = () => {
+        return parseFloat((100 * Number(tareas.filter(task => task.estado).length)) / Number(tareas.length)).toFixed(0);
     }
 
     const { msg } = alerta;
@@ -89,7 +93,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Total Tareas</p>
-                            <p className="text-2xl font-bold text-gray-900">24</p>
+                            <p className="text-2xl font-bold text-gray-900">{tareas.length}</p>
                         </div>
                     </div>
                 </div>
@@ -114,7 +118,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Completadas</p>
-                            <p className="text-2xl font-bold text-gray-900">16</p>
+                            <p className="text-2xl font-bold text-gray-900">{tareas.filter(task => task.estado).length}</p>
                         </div>
                     </div>
                 </div>
@@ -139,7 +143,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Pendientes</p>
-                            <p className="text-2xl font-bold text-gray-900">8</p>
+                            <p className="text-2xl font-bold text-gray-900">{tareas.filter(task => !task.estado).length}</p>
                         </div>
                     </div>
                 </div>
@@ -164,7 +168,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Progreso</p>
-                            <p className="text-2xl font-bold text-gray-900">67%</p>
+                            <p className="text-2xl font-bold text-gray-900">{calcularProgreso()}%</p>
                         </div>
                     </div>
                 </div>
