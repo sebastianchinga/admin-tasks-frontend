@@ -4,6 +4,7 @@ import useAuth from "../hooks/useAuth";
 import useIniciales from "../hooks/useIniciales";
 
 const AdminLayout = () => {
+    
     const { abrirDropdown, dropdown } = useDropdown();
     const { cargando, auth, cerrarSesion } = useAuth();
     const { obtenerIniciales } = useIniciales();

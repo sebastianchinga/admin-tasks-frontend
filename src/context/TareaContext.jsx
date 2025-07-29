@@ -34,12 +34,26 @@ export const TareaProvider = ({ children }) => {
 
     useEffect(() => {
         const filtrarTareas = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            }
+
             if (filtro == '1') {
                 console.log('Mostrando las tareas completadas');
             } else if (filtro == '0') {
                 console.log('Mostrando las tareas pendientes');
             } else {
-                console.log('Mostrando todas las tareas');
+                try {
+                    const { data } = await clienteAxios.get('/tareas', config);
+                    setTareas(data);
+                } catch (error) {
+                    setTareas([]);
+                }
             }
         }
 
@@ -66,11 +80,20 @@ export const TareaProvider = ({ children }) => {
     }
 
     const guardarTarea = async (tarea) => {
-        if (tarea.id) {
-            console.log('Editando');
-        } else {
-            console.log('Guardando tarea');
-            
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const config = {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            }
+        }
+
+        try {
+            const { data } = await clienteAxios.post('/tareas/', tarea, config);
+            setTareas([data, ...tareas]);
+        } catch (error) {
+            console.log(error);
         }
     }
 

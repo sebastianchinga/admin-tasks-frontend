@@ -8,9 +8,10 @@ const Admin = () => {
 
     const { abrirModal, cerrarModal, modal } = useModal();
     const { tareas, setFiltro, guardarTarea } = useTarea();
+    
     const [titulo, setTitulo] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    const [id, setId] = useState(null);
+
     const [alerta, setAlerta] = useState({});
 
     const handleSubmit = async (e) => {
@@ -23,8 +24,7 @@ const Admin = () => {
             })
             return;
         }
-
-        await guardarTarea({ id, titulo, descripcion });
+        await guardarTarea({ titulo, descripcion });
         setTitulo('')
         setDescripcion('')
         setAlerta({})
@@ -209,7 +209,7 @@ const Admin = () => {
             {/* Tasks Grid */}
             <div id="tasksContainer" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {tareas.map(tarea => (
-                    <Tarea tarea={tarea} key={tarea.id} />
+                    <Tarea tarea={tarea} key={tarea.id} fn={abrirModal} />
                 ))}
             </div>
             {/* Modal for New/Edit Task */}
