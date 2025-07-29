@@ -34,6 +34,7 @@ export const TareaProvider = ({ children }) => {
 
     useEffect(() => {
         const filtrarTareas = async () => {
+            // Obtener token
             const token = localStorage.getItem('token');
             if (!token) return;
             const config = {
@@ -44,9 +45,19 @@ export const TareaProvider = ({ children }) => {
             }
 
             if (filtro == '1') {
-                console.log('Mostrando las tareas completadas');
+                try {
+                    const { data } = await clienteAxios.get(`/tareas/filtrar/${filtro}`, config);
+                    setTareas(data)
+                } catch (error) {
+                    setTareas([])
+                }
             } else if (filtro == '0') {
-                console.log('Mostrando las tareas pendientes');
+                try {
+                    const { data } = await clienteAxios.get(`/tareas/filtrar/${filtro}`, config);
+                    setTareas(data)
+                } catch (error) {
+                    setTareas([])
+                }
             } else {
                 try {
                     const { data } = await clienteAxios.get('/tareas', config);
