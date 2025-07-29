@@ -1,8 +1,37 @@
+import { useState } from "react";
+import Tarea from "../../components/Tarea";
 import useModal from "../../hooks/useModal"
+import useTarea from "../../hooks/useTarea";
+import Alerta from "../../components/Alerta";
 
 const Admin = () => {
 
     const { abrirModal, cerrarModal, modal } = useModal();
+    const { tareas, setFiltro, guardarTarea } = useTarea();
+    const [titulo, setTitulo] = useState('');
+    const [descripcion, setDescripcion] = useState('');
+    const [id, setId] = useState(null);
+    const [alerta, setAlerta] = useState({});
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if ([titulo, descripcion].includes("")) {
+            setAlerta({
+                msg: 'Completa los campos',
+                error: true
+            })
+            return;
+        }
+
+        await guardarTarea({ id, titulo, descripcion });
+        setTitulo('')
+        setDescripcion('')
+        setAlerta({})
+        cerrarModal()
+    }
+
+    const { msg } = alerta;
 
     return (
         <>
@@ -144,19 +173,15 @@ const Admin = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
                 <div className="flex items-center space-x-4 mb-4 sm:mb-0">
                     <select
+                        onChange={e => setFiltro(e.target.value)}
                         id="statusFilter"
                         className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                        <option value="all">Todas las tareas</option>
-                        <option value="pending">Pendientes</option>
-                        <option value="in-progress">En progreso</option>
-                        <option value="completed">Completadas</option>
+                        <option value="">Todas las tareas</option>
+                        <option value={0}>Pendientes</option>
+                        <option value={1}>Completadas</option>
                     </select>
-                    <select className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option>Ordenar por fecha</option>
-                        <option>Ordenar por prioridad</option>
-                        <option>Ordenar por estado</option>
-                    </select>
+
                 </div>
                 <div className="relative">
                     <input
@@ -182,473 +207,10 @@ const Admin = () => {
                 </div>
             </div>
             {/* Tasks Grid */}
-            <div
-                id="tasksContainer"
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-                {/* Task Card 1 */}
-                <div
-                    className="task-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-                    data-status="pending"
-                    data-task-id={1}
-                >
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                Diseñar mockups de homepage
-                            </h3>
-                            <p className="text-sm text-gray-600 line-clamp-2">
-                                Crear diseños de alta fidelidad para la nueva homepage del sitio
-                                web, incluyendo versiones desktop y móvil con todos los componentes
-                                necesarios.
-                            </p>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                Pendiente
-                            </span>
-                            <button
-                                className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                            >
-                                <svg
-                                    className="w-3 h-3 mr-1"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    ></path>
-                                </svg>
-                                Editar
-                            </button>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center text-sm text-gray-500">
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                ></path>
-                            </svg>
-                            Vence: 25 Mar 2024
-                        </div>
-                        <button
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                        >
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M5 13l4 4L19 7"
-                                ></path>
-                            </svg>
-                            Completar
-                        </button>
-                    </div>
-                </div>
-                {/* Task Card 2 */}
-                <div
-                    className="task-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-                    data-status="in-progress"
-                    data-task-id={2}
-                >
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                Implementar autenticación JWT
-                            </h3>
-                            <p className="text-sm text-gray-600 line-clamp-2">
-                                Desarrollar sistema de autenticación con JSON Web Tokens para la
-                                API, incluyendo login, registro y middleware de verificación.
-                            </p>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                En Progreso
-                            </span>
-                            <button
-                                className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                            >
-                                <svg
-                                    className="w-3 h-3 mr-1"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    ></path>
-                                </svg>
-                                Editar
-                            </button>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center text-sm text-gray-500">
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                ></path>
-                            </svg>
-                            Vence: 28 Mar 2024
-                        </div>
-                        <button
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                        >
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M5 13l4 4L19 7"
-                                ></path>
-                            </svg>
-                            Completar
-                        </button>
-                    </div>
-                </div>
-                {/* Task Card 3 */}
-                <div
-                    className="task-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-                    data-status="completed"
-                    data-task-id={3}
-                >
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900 line-through opacity-75">
-                                Configurar base de datos
-                            </h3>
-                            <p className="text-sm text-gray-600 line-clamp-2 opacity-75">
-                                Configurar PostgreSQL en el servidor de producción con todas las
-                                tablas necesarias y datos de prueba iniciales.
-                            </p>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Completada
-                            </span>
-                            <button
-                                className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                            >
-                                <svg
-                                    className="w-3 h-3 mr-1"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    ></path>
-                                </svg>
-                                Editar
-                            </button>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center text-sm text-gray-500">
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
-                            Completada el 20 Mar
-                        </div>
-                        <button
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                        >
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                ></path>
-                            </svg>
-                            Reabrir
-                        </button>
-                    </div>
-                </div>
-                {/* Task Card 4 */}
-                <div
-                    className="task-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-                    data-status="pending"
-                    data-task-id={4}
-                >
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                Escribir documentación API
-                            </h3>
-                            <p className="text-sm text-gray-600 line-clamp-2">
-                                Crear documentación completa de la API REST con ejemplos de uso,
-                                códigos de respuesta y guía de integración para desarrolladores.
-                            </p>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                Pendiente
-                            </span>
-                            <button
-                                className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                            >
-                                <svg
-                                    className="w-3 h-3 mr-1"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    ></path>
-                                </svg>
-                                Editar
-                            </button>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center text-sm text-gray-500">
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                ></path>
-                            </svg>
-                            Vence: 30 Mar 2024
-                        </div>
-                        <button
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                        >
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M5 13l4 4L19 7"
-                                ></path>
-                            </svg>
-                            Completar
-                        </button>
-                    </div>
-                </div>
-                {/* Task Card 5 */}
-                <div
-                    className="task-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-                    data-status="in-progress"
-                    data-task-id={5}
-                >
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                Optimizar rendimiento frontend
-                            </h3>
-                            <p className="text-sm text-gray-600 line-clamp-2">
-                                Mejorar tiempos de carga de la aplicación web mediante lazy loading,
-                                compresión de imágenes y optimización de bundles JavaScript.
-                            </p>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                En Progreso
-                            </span>
-                            <button
-                                className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                            >
-                                <svg
-                                    className="w-3 h-3 mr-1"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    ></path>
-                                </svg>
-                                Editar
-                            </button>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center text-sm text-gray-500">
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                ></path>
-                            </svg>
-                            Vence: 2 Abr 2024
-                        </div>
-                        <button
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                        >
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M5 13l4 4L19 7"
-                                ></path>
-                            </svg>
-                            Completar
-                        </button>
-                    </div>
-                </div>
-                {/* Task Card 6 */}
-                <div
-                    className="task-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-                    data-status="completed"
-                    data-task-id={6}
-                >
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900 line-through opacity-75">
-                                Configurar CI/CD pipeline
-                            </h3>
-                            <p className="text-sm text-gray-600 line-clamp-2 opacity-75">
-                                Implementar pipeline de integración y despliegue continuo con GitHub
-                                Actions para automatizar testing y deployment.
-                            </p>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Completada
-                            </span>
-                            <button
-                                className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                            >
-                                <svg
-                                    className="w-3 h-3 mr-1"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    ></path>
-                                </svg>
-                                Editar
-                            </button>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center text-sm text-gray-500">
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
-                            Completada el 18 Mar
-                        </div>
-                        <button
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                        >
-                            <svg
-                                className="w-4 h-4 mr-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                ></path>
-                            </svg>
-                            Reabrir
-                        </button>
-                    </div>
-                </div>
+            <div id="tasksContainer" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tareas.map(tarea => (
+                    <Tarea tarea={tarea} key={tarea.id} />
+                ))}
             </div>
             {/* Modal for New/Edit Task */}
             <div id="taskModal" className={`${!modal && 'hidden'} fixed inset-0 z-50 overflow-y-auto`}>
@@ -685,8 +247,13 @@ const Admin = () => {
                                 </svg>
                             </button>
                         </div>
+                        {msg && (
+                            <div className="px-5 pt-5">
+                                <Alerta alerta={alerta} />
+                            </div>
+                        )}
                         {/* Modal Body */}
-                        <form id="taskForm" className="p-6">
+                        <form id="taskForm" className="p-6" onSubmit={handleSubmit}>
                             <input type="hidden" id="taskId" name="taskId" />
                             <div className="space-y-4">
                                 {/* Title Field */}
@@ -699,9 +266,10 @@ const Admin = () => {
                                     </label>
                                     <input
                                         type="text"
+                                        value={titulo}
+                                        onChange={e => setTitulo(e.target.value)}
                                         id="taskTitle"
                                         name="title"
-                                        required=""
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         placeholder="Ej: Diseñar mockups de homepage"
                                     />
@@ -716,12 +284,12 @@ const Admin = () => {
                                     </label>
                                     <textarea
                                         id="taskDescription"
+                                        value={descripcion}
+                                        onChange={e => setDescripcion(e.target.value)}
                                         name="description"
                                         rows={4}
-                                        required=""
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                                         placeholder="Describe detalladamente lo que se debe hacer en esta tarea..."
-                                        defaultValue={""}
                                     />
                                 </div>
                             </div>

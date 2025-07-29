@@ -1,8 +1,13 @@
-import { Link, Outlet } from "react-router-dom"
+import { Link, Navigate, Outlet } from "react-router-dom"
 import useDropdown from "../hooks/useDropdown"
+import useAuth from "../hooks/useAuth";
+import useIniciales from "../hooks/useIniciales";
 
 const AdminLayout = () => {
-    const {abrirDropdown, dropdown} = useDropdown();
+    const { abrirDropdown, dropdown } = useDropdown();
+    const { cargando, auth, cerrarSesion } = useAuth();
+    const { obtenerIniciales } = useIniciales();
+    if (cargando) return 'cargando';
 
     return (
         <>
@@ -22,7 +27,7 @@ const AdminLayout = () => {
                                 className="flex items-center space-x-3 p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                             >
                                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                                    <span className="text-sm font-medium text-white">JD</span>
+                                    <span className="text-sm font-medium text-white">{obtenerIniciales(auth.nombre)}</span>
                                 </div>
                                 <svg
                                     className="w-4 h-4 text-gray-400"
@@ -46,8 +51,8 @@ const AdminLayout = () => {
                                 <div className="py-1">
                                     {/* User Info */}
                                     <div className="px-4 py-3 border-b border-gray-100">
-                                        <p className="text-sm font-medium text-gray-900">Juan Pérez</p>
-                                        <p className="text-sm text-gray-500">juan@taskmanager.com</p>
+                                        <p className="text-sm font-medium text-gray-900">{auth.nombre}</p>
+                                        <p className="text-sm text-gray-500">{auth.email}</p>
                                     </div>
                                     {/* Menu Items */}
                                     <a
@@ -114,10 +119,9 @@ const AdminLayout = () => {
                                         Ayuda y Soporte
                                     </a>
                                     <div className="border-t border-gray-100 mt-1">
-                                        <a
-                                            href="#"
-                                            className="flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors"
-                                        >
+                                        <button onClick={cerrarSesion}
+                                            className="flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors hover:cursor-pointer">
+
                                             <svg
                                                 className="w-4 h-4 mr-3 text-red-400"
                                                 fill="none"
@@ -132,7 +136,7 @@ const AdminLayout = () => {
                                                 ></path>
                                             </svg>
                                             Cerrar Sesión
-                                        </a>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -142,7 +146,7 @@ const AdminLayout = () => {
             </header>
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <Outlet />
+                {auth?.id ? <Outlet /> : <Navigate to="/" />}
             </main>
         </>
     )

@@ -1,6 +1,51 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
+import Alerta from "../../components/Alerta";
+import clienteAxios from "../../config/axios";
 
 const Registro = () => {
+
+  const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirmar, setPasswordConfirmar] = useState('');
+
+  const [alerta, setAlerta] = useState({});
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if ([nombre, email, password].includes("")) {
+      setAlerta({
+        msg: 'Completa los campos',
+        error: true
+      })
+      return;
+    }
+
+    if (password !== passwordConfirmar) {
+      setAlerta({
+        msg: 'Los passwords no coinciden',
+        error: true
+      })
+      return;
+    }
+
+    try {
+      const { data } = await clienteAxios.post('/usuarios/registrar', { nombre, email, password });
+      setAlerta({
+        msg: data.msg
+      })
+    } catch (error) {
+      setAlerta({
+        msg: error.response.data.msg,
+        error: true
+      })
+    }
+  }
+
+  const { msg } = alerta;
+
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[calc(100vh-200px)]">
@@ -125,41 +170,24 @@ const Registro = () => {
             </h2>
             <p className="text-gray-600">Completa el formulario para comenzar</p>
           </div>
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Name Fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="firstName"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Nombre
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  required=""
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Tu nombre"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="lastName"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Apellido
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  required=""
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Tu apellido"
-                />
-              </div>
+            <div>
+              <label
+                htmlFor="firstName"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Nombre
+              </label>
+              <input
+                type="text"
+                value={nombre}
+                onChange={e => setNombre(e.target.value)}
+                id="firstName"
+                name="firstName"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Tu nombre"
+              />
             </div>
             {/* Email */}
             <div>
@@ -171,9 +199,10 @@ const Registro = () => {
               </label>
               <input
                 type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 id="email"
                 name="email"
-                required=""
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="tu@email.com"
               />
@@ -188,9 +217,10 @@ const Registro = () => {
               </label>
               <input
                 type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
                 id="password"
                 name="password"
-                required=""
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Mínimo 8 caracteres"
               />
@@ -208,36 +238,13 @@ const Registro = () => {
               </label>
               <input
                 type="password"
+                value={passwordConfirmar}
+                onChange={e => setPasswordConfirmar(e.target.value)}
                 id="confirmPassword"
                 name="confirmPassword"
-                required=""
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Repite tu contraseña"
               />
-            </div>
-            {/* Terms and Conditions */}
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  required=""
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="terms" className="text-gray-700">
-                  Acepto los
-                  <a href="#" className="text-blue-600 hover:text-blue-500 underline">
-                    términos y condiciones
-                  </a>
-                  y la
-                  <a href="#" className="text-blue-600 hover:text-blue-500 underline">
-                    política de privacidad
-                  </a>
-                </label>
-              </div>
             </div>
             {/* Submit Button */}
             <button
@@ -246,6 +253,7 @@ const Registro = () => {
             >
               Crear cuenta gratuita
             </button>
+            {msg && <Alerta alerta={alerta} />}
             {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -300,7 +308,7 @@ const Registro = () => {
             </div>
           </form>
 
-          
+
         </div>
       </div>
 
