@@ -1,7 +1,7 @@
 const Alerta = ({ alerta }) => {
     const { msg, error } = alerta
     return (
-        <div id="errorMessage" className={`bg-${error ? 'red' : 'green'}-50 border border-${error ? 'red' : 'green'}-200 rounded-md p-4`}>
+        <div id="errorMessage" className={`${error ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200'} rounded-md p-4`}>
             <div className="flex">
                 <div className="flex-shrink-0">
                     {error ? (
