@@ -7,6 +7,7 @@ const TareaContext = createContext();
 export const TareaProvider = ({ children }) => {
 
     const [tareas, setTareas] = useState([]);
+    const [tarea, setTarea] = useState({});
     const [filtro, setFiltro] = useState('');
     const { auth } = useAuth();
 
@@ -91,6 +92,8 @@ export const TareaProvider = ({ children }) => {
     }
 
     const guardarTarea = async (tarea) => {
+        console.log(tarea);
+
         const token = localStorage.getItem('token');
         if (!token) return;
         const config = {
@@ -100,21 +103,34 @@ export const TareaProvider = ({ children }) => {
             }
         }
 
-        try {
-            const { data } = await clienteAxios.post('/tareas/', tarea, config);
-            setTareas([data, ...tareas]);
-        } catch (error) {
-            console.log(error);
+        if (tarea.id) {
+            try {
+                const { data } = await clienteAxios.put(`/tareas/${tarea.id}`, tarea, config);
+                setTareas(prew => prew.map(task => task.id === data.id ? data : task));
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
+            try {
+                const { data } = await clienteAxios.post('/tareas/', tarea, config);
+                setTareas([data, ...tareas]);
+            } catch (error) {
+                console.log(error);
+            }
         }
+
+
     }
 
     return (
         <TareaContext.Provider value={{
             tareas,
+            tarea,
             filtro,
             setFiltro,
             cambiarEstado,
-            guardarTarea
+            guardarTarea,
+            setTarea
         }}>
             {children}
         </TareaContext.Provider>

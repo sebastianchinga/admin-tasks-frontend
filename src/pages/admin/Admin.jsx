@@ -8,10 +8,11 @@ import clienteAxios from "../../config/axios";
 const Admin = () => {
 
     const { abrirModal, cerrarModal, modal } = useModal();
-    const { tareas, setFiltro, guardarTarea } = useTarea();
+    const { tareas, setFiltro, guardarTarea, tarea } = useTarea();
 
     const [titulo, setTitulo] = useState('');
     const [descripcion, setDescripcion] = useState('');
+    const [id, setId] = useState(null);
     const [tasks, setTasks] = useState([]);
 
     const [alerta, setAlerta] = useState({});
@@ -26,7 +27,8 @@ const Admin = () => {
             })
             return;
         }
-        await guardarTarea({ titulo, descripcion });
+
+        await guardarTarea({ id, titulo, descripcion });
         setTitulo('')
         setDescripcion('')
         setAlerta({})
@@ -61,6 +63,14 @@ const Admin = () => {
         const resultado = parseFloat((100 * completadas) / total).toFixed(0);
         return resultado
     }, [tasks])
+
+    useEffect(() => {
+        if (tarea) {
+            setId(tarea.id);
+            setTitulo(tarea.titulo ?? '')
+            setDescripcion(tarea.descripcion ?? '')
+        }
+    }, [tarea])
 
     const { msg } = alerta;
 

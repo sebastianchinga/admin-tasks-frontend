@@ -1,8 +1,14 @@
 import useTarea from "../hooks/useTarea";
 
-const Tarea = ({ tarea }) => {
+const Tarea = ({ tarea, fn }) => {
     const { titulo, descripcion, estado } = tarea;
     const { cambiarEstado } = useTarea();
+    const { setTarea } = useTarea();
+
+    const editando = (tarea) => {
+        setTarea(tarea)
+        fn()
+    }
 
     return (
         <div
@@ -24,6 +30,7 @@ const Tarea = ({ tarea }) => {
                         {estado ? 'Completado' : 'Pendiente'}
                     </span>
                     <button
+                        onClick={() => editando(tarea)}
                         className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                     >
                         <svg
