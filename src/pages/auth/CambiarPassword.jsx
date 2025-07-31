@@ -48,6 +48,7 @@ const CambiarPassword = () => {
       const {data} = await clienteAxios.put(`/usuarios/olvide-password/${token}`, {password});
       setAlerta({
         msg: data.msg,
+        error: false
       })
       setPassword('')
       setPasswordConfirmar('')
