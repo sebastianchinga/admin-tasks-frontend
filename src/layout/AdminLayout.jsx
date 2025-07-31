@@ -28,7 +28,7 @@ const AdminLayout = () => {
                                 className="flex items-center space-x-3 p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                             >
                                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                                    <span className="text-sm font-medium text-white">{obtenerIniciales(auth.nombre)}</span>
+                                    <span className="text-sm font-medium text-white">{auth?.id && obtenerIniciales(auth.nombre)}</span>
                                 </div>
                                 <svg
                                     className="w-4 h-4 text-gray-400"

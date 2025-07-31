@@ -8,6 +8,8 @@ import AdminLayout from "./layout/AdminLayout"
 import Admin from "./pages/admin/Admin"
 import { AuthProvider } from "./context/AuthContext"
 import { TareaProvider } from "./context/TareaContext"
+import ConfirmarCuenta from "./pages/auth/ConfirmarCuenta"
+import CambiarPassword from "./pages/auth/CambiarPassword"
 
 // import {} from ''
 function App() {
@@ -23,6 +25,8 @@ function App() {
                 <Route path="registrar" element={<Registro />} />
                 <Route path="login" element={<Login />} />
                 <Route path="olvide-password" element={<OlvidePassword />} />
+                <Route path="confirmar-cuenta/:token" element={<ConfirmarCuenta />} />
+                <Route path="olvide-password/:token" element={<CambiarPassword />} />
               </Route>
 
               <Route path="home" element={<AdminLayout />}>

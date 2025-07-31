@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Tarea from "../../components/Tarea";
 import useModal from "../../hooks/useModal"
 import useTarea from "../../hooks/useTarea";
 import Alerta from "../../components/Alerta";
+import clienteAxios from "../../config/axios";
 
 const Admin = () => {
 
@@ -11,6 +12,7 @@ const Admin = () => {
 
     const [titulo, setTitulo] = useState('');
     const [descripcion, setDescripcion] = useState('');
+    const [tasks, setTasks] = useState([]);
 
     const [alerta, setAlerta] = useState({});
 
@@ -31,9 +33,34 @@ const Admin = () => {
         cerrarModal()
     }
 
-    const calcularProgreso = () => {
-        return parseFloat((100 * Number(tareas.filter(task => task.estado).length)) / Number(tareas.length)).toFixed(0);
-    }
+    useEffect(() => {
+        const obtenerTasks = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+                const config = {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+
+                const { data } = await clienteAxios.get('/tareas/', config);
+                setTasks(data);
+            } catch (error) {
+                setTasks([]);
+            }
+        }
+
+        obtenerTasks()
+    }, [tareas])
+
+    const obtenerPorcentaje = useMemo(() => {
+        const total = tasks.length;
+        const completadas = tasks.filter(task => task.estado).length;
+        const resultado = parseFloat((100 * completadas) / total).toFixed(0);
+        return resultado
+    }, [tasks])
 
     const { msg } = alerta;
 
@@ -93,7 +120,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Total Tareas</p>
-                            <p className="text-2xl font-bold text-gray-900">{tareas.length}</p>
+                            <p className="text-2xl font-bold text-gray-900">{tasks.length}</p>
                         </div>
                     </div>
                 </div>
@@ -118,7 +145,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Completadas</p>
-                            <p className="text-2xl font-bold text-gray-900">{tareas.filter(task => task.estado).length}</p>
+                            <p className="text-2xl font-bold text-gray-900">{tasks.filter(task => task.estado).length}</p>
                         </div>
                     </div>
                 </div>
@@ -143,7 +170,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Pendientes</p>
-                            <p className="text-2xl font-bold text-gray-900">{tareas.filter(task => !task.estado).length}</p>
+                            <p className="text-2xl font-bold text-gray-900">{tasks.filter(task => !task.estado).length}</p>
                         </div>
                     </div>
                 </div>
@@ -168,7 +195,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Progreso</p>
-                            <p className="text-2xl font-bold text-gray-900">{calcularProgreso()}%</p>
+                            <p className="text-2xl font-bold text-gray-900">{tasks.length > 0 ? obtenerPorcentaje : 0}%</p>
                         </div>
                     </div>
                 </div>

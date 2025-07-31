@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
             const token = localStorage.getItem('token');
             if (!token) {
                 setCargando(false);
+                return;
             }
 
             const config = {
@@ -25,7 +26,7 @@ export const AuthProvider = ({ children }) => {
             }
 
             try {
-                const { data } = await clienteAxios.get('/usuarios/perfil', config);
+                const { data } = await clienteAxios.get('/usuarios/perfil', config);                
                 setAuth(data);
             } catch (error) {
                 setAuth({});
