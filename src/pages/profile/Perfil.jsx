@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import useAuth from "../../hooks/useAuth"
 import useIniciales from "../../hooks/useIniciales";
 import useModalPerfil from "../../hooks/useModalPerfil";
-import useDropdown from "../../hooks/useDropdown";
 import useTarea from "../../hooks/useTarea";
 import Alerta from "../../components/Alerta";
 import clienteAxios from "../../config/axios";
@@ -11,7 +10,6 @@ const Perfil = () => {
 
     // Custom Hooks
     const { modalPerfil, cerrarModalPerfil, mostrarPerfil } = useModalPerfil();
-    const { setDropdown } = useDropdown();
     const { tareas } = useTarea()
     const { auth, setAuth } = useAuth();
     const { obtenerIniciales } = useIniciales();
@@ -34,10 +32,8 @@ const Perfil = () => {
         setEmail(auth.email)
     }, [])
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const { id } = auth;
 
         if ([nombre, email].includes("")) {
             setAlerta({
@@ -260,6 +256,7 @@ const Perfil = () => {
                             Estadísticas
                         </h3>
                         <div className="space-y-4">
+                            {/* Tareas completadas */}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
@@ -279,6 +276,7 @@ const Perfil = () => {
                                 </div>
                                 <span className="text-lg font-semibold text-gray-900">{tareas.filter(tarea => tarea.estado).length}</span>
                             </div>
+                            {/* Tareas activas (completadas y pendientes) */}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -300,6 +298,7 @@ const Perfil = () => {
                                 </div>
                                 <span className="text-lg font-semibold text-gray-900">{tareas.length}</span>
                             </div>
+                            {/* Proceso General */}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">

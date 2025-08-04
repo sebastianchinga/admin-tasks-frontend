@@ -7,11 +7,12 @@ import clienteAxios from "../../config/axios";
 
 const Admin = () => {
 
+    // Referencias a elementos HTML
     const modalEdit = useRef(null);
-    const modalOverlay = useRef(null);
+    // Custom hooks
     const { abrirModal, cerrarModal, modal } = useModal();
     const { tareas, setFiltro, guardarTarea, tarea } = useTarea();
-
+    // States
     const [titulo, setTitulo] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [id, setId] = useState(null);
@@ -43,9 +44,6 @@ const Admin = () => {
                 cerrarModal()
             }
         });
-        modalOverlay.current.addEventListener('click', () => {
-            console.log('Hola');
-        })
     }, [])
 
     useEffect(() => {
@@ -269,7 +267,7 @@ const Admin = () => {
             {/* Modal for New/Edit Task */}
             <div ref={modalEdit} id="taskModal" className={`${!modal && 'hidden'} fixed inset-0 z-50 overflow-y-auto`}>
                 {/* Modal Overlay */}
-                <div id="taskModalOverlay" className="fixed inset-0 bg-black/50 z-40" ref={modalOverlay} />
+                <div id="taskModalOverlay" className="fixed inset-0 bg-black/50 z-40" />
                 {/* Modal Content */}
                 <div className="flex min-h-full items-center justify-center p-4 relative z-50">
                     <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full mx-auto">

@@ -5,10 +5,11 @@ import clienteAxios from "../config/axios";
 const TareaContext = createContext();
 
 export const TareaProvider = ({ children }) => {
-
+    // States
     const [tareas, setTareas] = useState([]);
     const [tarea, setTarea] = useState({});
     const [filtro, setFiltro] = useState('');
+    // Custom hook (Context auth)
     const { auth } = useAuth();
 
     useEffect(() => {
@@ -91,19 +92,22 @@ export const TareaProvider = ({ children }) => {
         }
     }
 
+    // Crear/editar una tarea
     const guardarTarea = async (tarea) => {
-        console.log(tarea);
-
+        // Obtener token
         const token = localStorage.getItem('token');
+        // Si no hay token, deten la ejecucion
         if (!token) return;
+        // Crear objeto de configuracion que tendrá el token
         const config = {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`
             }
         }
-
+        // Si hay un id en tarea
         if (tarea.id) {
+            // Actualiza la tarea
             try {
                 const { data } = await clienteAxios.put(`/tareas/${tarea.id}`, tarea, config);
                 setTareas(prew => prew.map(task => task.id === data.id ? data : task));
@@ -111,6 +115,7 @@ export const TareaProvider = ({ children }) => {
                 console.log(error);
             }
         } else {
+            // Crea una nueva tarea
             try {
                 const { data } = await clienteAxios.post('/tareas/', tarea, config);
                 setTareas([data, ...tareas]);
