@@ -319,7 +319,7 @@ const Perfil = () => {
                                     </div>
                                     <span className="text-sm text-gray-700">Progreso general</span>
                                 </div>
-                                <span className="text-lg font-semibold text-gray-900">{(100 * tareas.filter(tarea => tarea.estado).length) / tareas.length}%</span>
+                                <span className="text-lg font-semibold text-gray-900">{tareas.length > 0 ? (100 * tareas.filter(tarea => tarea.estado).length) / tareas.length : 0}%</span>
                             </div>
                         </div>
                     </div>
