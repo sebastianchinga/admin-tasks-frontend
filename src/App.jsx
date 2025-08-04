@@ -10,6 +10,7 @@ import { AuthProvider } from "./context/AuthContext"
 import { TareaProvider } from "./context/TareaContext"
 import ConfirmarCuenta from "./pages/auth/ConfirmarCuenta"
 import CambiarPassword from "./pages/auth/CambiarPassword"
+import Perfil from "./pages/profile/Perfil"
 
 // import {} from ''
 function App() {
@@ -31,6 +32,10 @@ function App() {
 
               <Route path="home" element={<AdminLayout />}>
                 <Route index element={<Admin />} />
+              </Route>
+
+              <Route path="perfil" element={<AdminLayout />}>
+                <Route index element={<Perfil />} />
               </Route>
             </Routes>
           </TareaProvider>

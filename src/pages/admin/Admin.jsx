@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Tarea from "../../components/Tarea";
 import useModal from "../../hooks/useModal"
 import useTarea from "../../hooks/useTarea";
@@ -7,6 +7,8 @@ import clienteAxios from "../../config/axios";
 
 const Admin = () => {
 
+    const modalEdit = useRef(null);
+    const modalOverlay = useRef(null);
     const { abrirModal, cerrarModal, modal } = useModal();
     const { tareas, setFiltro, guardarTarea, tarea } = useTarea();
 
@@ -34,6 +36,17 @@ const Admin = () => {
         setAlerta({})
         cerrarModal()
     }
+
+    useEffect(() => {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modalEdit.current.classList.contains('hidden')) {
+                cerrarModal()
+            }
+        });
+        modalOverlay.current.addEventListener('click', () => {
+            console.log('Hola');
+        })
+    }, [])
 
     useEffect(() => {
         const obtenerTasks = async () => {
@@ -254,9 +267,9 @@ const Admin = () => {
                 ))}
             </div>
             {/* Modal for New/Edit Task */}
-            <div id="taskModal" className={`${!modal && 'hidden'} fixed inset-0 z-50 overflow-y-auto`}>
+            <div ref={modalEdit} id="taskModal" className={`${!modal && 'hidden'} fixed inset-0 z-50 overflow-y-auto`}>
                 {/* Modal Overlay */}
-                <div id="taskModalOverlay" className="fixed inset-0 bg-black/50 z-40" />
+                <div id="taskModalOverlay" className="fixed inset-0 bg-black/50 z-40" ref={modalOverlay} />
                 {/* Modal Content */}
                 <div className="flex min-h-full items-center justify-center p-4 relative z-50">
                     <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full mx-auto">
