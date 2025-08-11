@@ -1,24 +1,101 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import Tarea from "../../components/Tarea";
-import useModal from "../../hooks/useModal"
-import useTarea from "../../hooks/useTarea";
-import Alerta from "../../components/Alerta";
-import clienteAxios from "../../config/axios";
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom'
+import clienteAxios from '../../config/axios';
+import Tarea from '../../components/Tarea';
+import useAuth from '../../hooks/useAuth';
+import useModal from '../../hooks/useModal';
+import Alerta from '../../components/Alerta';
+const Tareas = () => {
 
-const Admin = () => {
-
-    // Referencias a elementos HTML
-    const modalEdit = useRef(null);
-    // Custom hooks
     const { abrirModal, cerrarModal, modal } = useModal();
-    const { tareas, setFiltro, guardarTarea, tarea } = useTarea();
-    // States
-    const [titulo, setTitulo] = useState('');
-    const [descripcion, setDescripcion] = useState('');
-    const [id, setId] = useState(null);
-    const [tasks, setTasks] = useState([]);
+    const { slug } = useParams(); // Parametro de la url
+    const [tareas, setTareas] = useState([]); // Array de tareas consultadas por el proyecto
+    const [filtrados, setFiltrados] = useState([]); // Array del resultado de los filtros
+    const [filtro, setFiltro] = useState('');
+    const { auth } = useAuth() // Hook para el authContext
 
+    const [titulo, setTitulo] = useState('')
+    const [descripcion, setDescripcion] = useState('')
+    const [id, setId] = useState(null);
     const [alerta, setAlerta] = useState({});
+
+    // useEffect: Carga todas las tareas
+    useEffect(() => {
+        const obtenerTareas = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            }
+
+            try {
+                const { data } = await clienteAxios.get(`/tareas/${slug}`, config);
+                setTareas(data.tareas);
+                setFiltrados(data.tareas);
+            } catch (error) {
+                setTareas([])
+            }
+        }
+        obtenerTareas()
+    }, [auth])
+
+    // useEffect: Filtra las tareas
+    useEffect(() => {
+        const filtrarTareas = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            }
+
+            try {
+                if (filtro === '0' || filtro === '1') {
+                    const { data } = await clienteAxios.get(`/tareas/filtrar/${slug}/${filtro}`, config);
+                    setFiltrados(data)
+                } else {
+                    const { data } = await clienteAxios.get(`/tareas/${slug}`, config);
+                    setFiltrados(data.tareas);
+                }
+
+            } catch (error) {
+                setFiltrados([]);
+            }
+        }
+        filtrarTareas()
+    }, [filtro])
+
+    const cambiarEstado = async (tarea) => {
+        const { id } = tarea
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const config = {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            }
+        }
+
+        try {
+            const { data } = await clienteAxios.put(`tareas/cambiar-estado/${id}`, tarea, config);
+            setTareas(prew => prew.map(p => p.id === data.id ? data : p));
+            setFiltrados(prew => prew.map(p => p.id === data.id ? data : p));
+        } catch (error) {
+            console.log('Hubo un error');
+        }
+    }
+
+    const editando = tarea => {
+        setId(tarea.id);
+        setTitulo(tarea.titulo)
+        setDescripcion(tarea.descripcion)
+        abrirModal()
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -31,59 +108,44 @@ const Admin = () => {
             return;
         }
 
-        await guardarTarea({ id, titulo, descripcion });
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const config = {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            }
+        }
+
+        if (id) {
+            try {
+                const { data } = await clienteAxios.put(`/tareas/editar-tarea/${id}`, { id, titulo, descripcion }, config);
+                setFiltrados(prew => prew.map(t => t.id == data.id ? data : t))
+            } catch (error) {
+                setAlerta({
+                    msg: error.response.data.msg,
+                    error: true
+                })
+            }
+        } else {
+            try {
+                const { data } = await clienteAxios.post(`/tareas/${slug}`, { id, titulo, descripcion }, config);
+                setTareas([data, ...tareas])
+                setFiltrados([data, ...tareas])
+            } catch (error) {
+                setAlerta({
+                    msg: error.response.data.msg,
+                    error: true
+                })
+            }
+        }
         setTitulo('')
         setDescripcion('')
-        setAlerta({})
+        setId(null)
         cerrarModal()
     }
 
-    useEffect(() => {
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !modalEdit.current.classList.contains('hidden')) {
-                cerrarModal()
-            }
-        });
-    }, [])
-
-    useEffect(() => {
-        const obtenerTasks = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) return;
-                const config = {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-
-                const { data } = await clienteAxios.get('/tareas/', config);
-                setTasks(data);
-            } catch (error) {
-                setTasks([]);
-            }
-        }
-
-        obtenerTasks()
-    }, [tareas])
-
-    const obtenerPorcentaje = useMemo(() => {
-        const total = tasks.length;
-        const completadas = tasks.filter(task => task.estado).length;
-        const resultado = parseFloat((100 * completadas) / total).toFixed(0);
-        return resultado
-    }, [tasks])
-
-    useEffect(() => {
-        if (tarea) {
-            setId(tarea.id);
-            setTitulo(tarea.titulo ?? '')
-            setDescripcion(tarea.descripcion ?? '')
-        }
-    }, [tarea])
-
-    const { msg } = alerta;
+    const { msg } = alerta
 
     return (
         <>
@@ -141,7 +203,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Total Tareas</p>
-                            <p className="text-2xl font-bold text-gray-900">{tasks.length}</p>
+                            <p className="text-2xl font-bold text-gray-900">{tareas.length}</p>
                         </div>
                     </div>
                 </div>
@@ -166,7 +228,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Completadas</p>
-                            <p className="text-2xl font-bold text-gray-900">{tasks.filter(task => task.estado).length}</p>
+                            <p className="text-2xl font-bold text-gray-900">{tareas.filter(tarea => tarea.estado).length}</p>
                         </div>
                     </div>
                 </div>
@@ -191,7 +253,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Pendientes</p>
-                            <p className="text-2xl font-bold text-gray-900">{tasks.filter(task => !task.estado).length}</p>
+                            <p className="text-2xl font-bold text-gray-900">{tareas.filter(tarea => !tarea.estado).length}</p>
                         </div>
                     </div>
                 </div>
@@ -216,7 +278,7 @@ const Admin = () => {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">Progreso</p>
-                            <p className="text-2xl font-bold text-gray-900">{tasks.length > 0 ? obtenerPorcentaje : 0}%</p>
+                            <p className="text-2xl font-bold text-gray-900">{(100 * tareas.filter(tarea => tarea.estado).length) / tareas.length || 0}%</p>
                         </div>
                     </div>
                 </div>
@@ -230,10 +292,14 @@ const Admin = () => {
                         className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                         <option value="">Todas las tareas</option>
-                        <option value={0}>Pendientes</option>
-                        <option value={1}>Completadas</option>
+                        <option value="0">Pendientes</option>
+                        <option value="1">Completadas</option>
                     </select>
-
+                    <select className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option>Ordenar por fecha</option>
+                        <option>Ordenar por prioridad</option>
+                        <option>Ordenar por estado</option>
+                    </select>
                 </div>
                 <div className="relative">
                     <input
@@ -259,17 +325,22 @@ const Admin = () => {
                 </div>
             </div>
             {/* Tasks Grid */}
-            <div id="tasksContainer" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {tareas.map(tarea => (
-                    <Tarea tarea={tarea} key={tarea.id} fn={abrirModal} />
+            <div id="tasksContainer" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" >
+                {filtrados.map(tarea => (
+                    <Tarea
+                        tarea={tarea}
+                        key={tarea.id}
+                        fn={cambiarEstado}
+                        onEdit={editando}
+                    />
                 ))}
             </div>
             {/* Modal for New/Edit Task */}
-            <div ref={modalEdit} id="taskModal" className={`${!modal && 'hidden'} fixed inset-0 z-50 overflow-y-auto`}>
+            <div id="taskModal" className={`${!modal && 'hidden'} fixed inset-0 z-50 overflow-y-auto`}>
                 {/* Modal Overlay */}
-                <div id="taskModalOverlay" className="fixed inset-0 bg-black/50 z-40" />
+                <div onClick={cerrarModal} id="taskModalOverlay" className="fixed inset-0 bg-black/50 bg-opacity-50 transition-opacity" />
                 {/* Modal Content */}
-                <div className="flex min-h-full items-center justify-center p-4 relative z-50">
+                <div className="flex min-h-full items-center justify-center p-4">
                     <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full mx-auto">
                         {/* Modal Header */}
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -300,13 +371,12 @@ const Admin = () => {
                             </button>
                         </div>
                         {msg && (
-                            <div className="px-5 pt-5">
-                                <Alerta alerta={alerta} />
+                            <div className='mx-6 mt-4'>
+                                {<Alerta alerta={alerta} />}
                             </div>
                         )}
                         {/* Modal Body */}
                         <form id="taskForm" className="p-6" onSubmit={handleSubmit}>
-                            <input type="hidden" id="taskId" name="taskId" />
                             <div className="space-y-4">
                                 {/* Title Field */}
                                 <div>
@@ -317,9 +387,9 @@ const Admin = () => {
                                         Título de la Tarea *
                                     </label>
                                     <input
-                                        type="text"
                                         value={titulo}
                                         onChange={e => setTitulo(e.target.value)}
+                                        type="text"
                                         id="taskTitle"
                                         name="title"
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -335,9 +405,9 @@ const Admin = () => {
                                         Descripción *
                                     </label>
                                     <textarea
-                                        id="taskDescription"
                                         value={descripcion}
                                         onChange={e => setDescripcion(e.target.value)}
+                                        id="taskDescription"
                                         name="description"
                                         rows={4}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
@@ -368,7 +438,8 @@ const Admin = () => {
                 </div>
             </div>
         </>
+
     )
 }
 
-export default Admin
+export default Tareas

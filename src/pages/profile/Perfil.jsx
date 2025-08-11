@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import useAuth from "../../hooks/useAuth"
 import useIniciales from "../../hooks/useIniciales";
 import useModalPerfil from "../../hooks/useModalPerfil";
-import useTarea from "../../hooks/useTarea";
 import Alerta from "../../components/Alerta";
 import clienteAxios from "../../config/axios";
 
@@ -10,7 +9,6 @@ const Perfil = () => {
 
     // Custom Hooks
     const { modalPerfil, cerrarModalPerfil, mostrarPerfil } = useModalPerfil();
-    const { tareas } = useTarea()
     const { auth, setAuth } = useAuth();
     const { obtenerIniciales } = useIniciales();
 
@@ -21,6 +19,9 @@ const Perfil = () => {
     const [nombre, setNombre] = useState('')
     const [email, setEmail] = useState('')
     const [alerta, setAlerta] = useState({})
+    const [proyectos, setProyectos] = useState([]);
+    const [completados, setCompletados] = useState(0);
+    const [progreso, setProgreso] = useState(0);
 
     useEffect(() => {
         document.addEventListener('keydown', (e) => {
@@ -30,6 +31,28 @@ const Perfil = () => {
         });
         setNombre(auth.nombre)
         setEmail(auth.email)
+    }, [])
+
+    useEffect(() => {
+        const obtenerProyectos = async () => {
+            const token = localStorage.getItem('token');
+
+            if (!token) return;
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            }
+
+            try {
+                const { data } = await clienteAxios.get('/proyectos/', config);
+                setProyectos(data);
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        obtenerProyectos();
     }, [])
 
     const handleSubmit = async (e) => {
@@ -61,6 +84,45 @@ const Perfil = () => {
         }
         cerrarModalPerfil()
     }
+
+    // Calcular estadisticas de los proyectos, escucha el array proyectos
+    useEffect(() => {
+        const obtenerEstadisticas = async () => {
+            const completados = []; // Crea nuevo para agregar las tareas
+            // Extraemos en un nuevo arra unicamente los slugs de cada proyecto
+            const slugs = proyectos.map(proyecto => proyecto.slug);
+            // Validamos, si slug tiene algo (mayor a 0)
+            if (slugs.length > 0) {
+
+                // Obtenemos token y creamos la cabecera para la peticion
+                const token = localStorage.getItem('token');
+                if (!token) return;
+                const config = {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+
+                // Iteramos, mientras index sea menor a la longitud del array slugs, incrementamos uno mas a index
+                for (let index = 0; index < slugs.length; index++) {
+                    // Por cada iteraccion hacemos extraemos la tarea y su info
+                    try {
+                        const { data } = await clienteAxios.get(`/tareas/${slugs[index]}`, config);
+                        // Agregamos la tarea y su info al array
+                        completados.push(data);
+                    } catch (error) {
+                        console.log('Hubo un error');
+                    }
+                }
+
+                // Seteamos los states completados y progreso
+                setCompletados(completados.filter(c => c.progreso === 100).length);
+                setProgreso(completados.filter(c => c.progreso < 100).length);
+            }
+        }
+        obtenerEstadisticas()
+    }, [proyectos])
 
     const { msg } = alerta
 
@@ -249,14 +311,35 @@ const Perfil = () => {
                     </div>
                 </div>
                 {/* Right Column - Stats & Settings */}
-                <div className="space-y-6">
+                <div className="space-y-6 mb-8">
                     {/* Statistics */}
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-6">
-                            Estadísticas
+                            Estadísticas de Proyectos
                         </h3>
                         <div className="space-y-4">
-                            {/* Tareas completadas */}
+                            {/* Added total projects statistic at the top */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <svg
+                                            className="w-4 h-4 text-gray-600"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                            ></path>
+                                        </svg>
+                                    </div>
+                                    <span className="text-sm text-gray-700">Total de proyectos</span>
+                                </div>
+                                <span className="text-lg font-semibold text-gray-900">{proyectos.length}</span>
+                            </div>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
@@ -272,11 +355,10 @@ const Perfil = () => {
                                             />
                                         </svg>
                                     </div>
-                                    <span className="text-sm text-gray-700">Tareas completadas</span>
+                                    <span className="text-sm text-gray-700">Proyectos completados</span>
                                 </div>
-                                <span className="text-lg font-semibold text-gray-900">{tareas.filter(tarea => tarea.estado).length}</span>
+                                <span className="text-lg font-semibold text-gray-900">{ completados}</span>
                             </div>
-                            {/* Tareas activas (completadas y pendientes) */}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -290,39 +372,18 @@ const Perfil = () => {
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
                                                 strokeWidth={2}
-                                                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                                             ></path>
                                         </svg>
                                     </div>
-                                    <span className="text-sm text-gray-700">Tareas activas</span>
+                                    <span className="text-sm text-gray-700">Proyectos en progreso</span>
                                 </div>
-                                <span className="text-lg font-semibold text-gray-900">{tareas.length}</span>
-                            </div>
-                            {/* Proceso General */}
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                        <svg
-                                            className="w-4 h-4 text-purple-600"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <span className="text-sm text-gray-700">Progreso general</span>
-                                </div>
-                                <span className="text-lg font-semibold text-gray-900">{tareas.length > 0 ? (100 * tareas.filter(tarea => tarea.estado).length) / tareas.length : 0}%</span>
+                                <span className="text-lg font-semibold text-gray-900">{progreso}</span>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             {/* Edit Profile Modal */}

@@ -13,7 +13,7 @@ const AdminLayout = () => {
     const { obtenerIniciales } = useIniciales();
 
     useEffect(() => {
-        document.addEventListener('click', (e) => { 
+        document.addEventListener('click', (e) => {
             if (!botonDrop.current.contains(e.target) && !botonDrop.current.contains(e.target)) {
                 setDropdown(false);
             }
@@ -30,7 +30,7 @@ const AdminLayout = () => {
                     <div className="flex justify-between items-center h-16">
                         {/* Logo/Brand */}
                         <div className="flex items-center">
-                            <Link to="/home" className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">TaskManager</Link>
+                            <Link to="/mis-proyectos" className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">TaskManager</Link>
                         </div>
                         {/* User Menu */}
                         <div className="relative">
