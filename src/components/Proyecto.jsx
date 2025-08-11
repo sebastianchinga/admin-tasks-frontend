@@ -71,7 +71,7 @@ const Proyecto = ({ proyecto }) => {
             <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Progreso</span>
-                    <span className="text-sm font-medium text-gray-900">{!cargando && progreso}%</span>
+                    <span className="text-sm font-medium text-gray-900">{!cargando && parseFloat(progreso).toFixed(0)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
