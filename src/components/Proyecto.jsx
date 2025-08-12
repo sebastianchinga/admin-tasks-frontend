@@ -5,7 +5,6 @@ import clienteAxios from "../config/axios";
 const Proyecto = ({ proyecto }) => {
     const { titulo, createdAt, slug } = proyecto;
 
-
     const [detalles, setDetalles] = useState({
         total: 0,
         progreso: 0,
@@ -49,8 +48,8 @@ const Proyecto = ({ proyecto }) => {
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         {titulo}
                     </h3>
-                    <p className="text-sm text-gray-500">Creado el {Intl.DateTimeFormat('es-PE', { day: "2-digit", month: "long", year: "numeric" })
-                        .format(new Date(createdAt))}</p>
+                    <p className="text-sm text-gray-500">Creado el {new Intl.DateTimeFormat('es-PE', { day: "numeric", month: 'long', year: "numeric"})
+                        .format(new Date(createdAt)).replace(/ de (\d{4})$/, " del $1")}</p>
                 </div>
                 <div className="flex items-center space-x-2">
                     {!cargando && (
