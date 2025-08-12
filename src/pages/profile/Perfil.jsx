@@ -445,8 +445,9 @@ const Perfil = () => {
                                             type="email"
                                             value={email}
                                             onChange={e => setEmail(e.target.value)}
+                                            disabled
                                             id="editEmail"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 bg-gray-100 focus:ring-blue-500 focus:border-blue-500 cursor-not-allowed"
                                         />
                                     </div>
                                     {/* <div>
