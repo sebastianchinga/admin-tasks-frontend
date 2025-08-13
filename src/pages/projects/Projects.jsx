@@ -3,11 +3,14 @@ import Proyecto from "../../components/Proyecto"
 import clienteAxios from "../../config/axios";
 import useAuth from "../../hooks/useAuth";
 import useModal from "../../hooks/useModal";
+import useDropdown from "../../hooks/useDropdown";
+import { useNavigate } from "react-router-dom";
 
 const Projects = () => {
   // Custom hooks
   const { modal, abrirModal, cerrarModal } = useModal();
   const { auth } = useAuth();
+  const navigate = useNavigate();
 
   // States
   const [proyectos, setProyectos] = useState([]);
@@ -75,6 +78,27 @@ const Projects = () => {
     setSlug('')
     setDescripcion('')
     cerrarModal()
+  }
+
+  const eliminarProyecto = async proyecto => {
+    const { id } = proyecto;
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      }
+    }
+
+    try {
+      const { data } = await clienteAxios.delete(`/proyectos/eliminar-proyecto/${id}`, config);
+      setProyectos(prew => prew.filter(p => p.id !== id));
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   const { msg } = alerta
@@ -180,7 +204,7 @@ const Projects = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Project Card  */}
         {proyectos.map(proyecto => (
-          <Proyecto key={proyecto.id} proyecto={proyecto} />
+          <Proyecto key={proyecto.id} proyecto={proyecto} onDelete={eliminarProyecto} />
         ))}
 
       </div>

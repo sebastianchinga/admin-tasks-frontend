@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import clienteAxios from "../config/axios";
+import useDropdown from "../hooks/useDropdown";
 
-const Proyecto = ({ proyecto }) => {
+const Proyecto = ({ proyecto, onDelete }) => {
     const { titulo, createdAt, slug } = proyecto;
+    const { dropdown, abrirDropdown } = useDropdown();
 
     const [detalles, setDetalles] = useState({
         total: 0,
@@ -48,7 +50,7 @@ const Proyecto = ({ proyecto }) => {
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         {titulo}
                     </h3>
-                    <p className="text-sm text-gray-500">Creado el {new Intl.DateTimeFormat('es-PE', { day: "numeric", month: 'long', year: "numeric"})
+                    <p className="text-sm text-gray-500">Creado el {new Intl.DateTimeFormat('es-PE', { day: "numeric", month: 'long', year: "numeric" })
                         .format(new Date(createdAt)).replace(/ de (\d{4})$/, " del $1")}</p>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -67,6 +69,36 @@ const Proyecto = ({ proyecto }) => {
                             </span>
                         ))
                     )}
+
+                    <div className="relative">
+                        <button onClick={abrirDropdown} className="p-1.5 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2  rounded-full transition-colors hover:cursor-pointer" title="Opciones del proyecto">
+                            <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                                />
+                            </svg>
+                        </button>
+                        {/* Dropdown Menu */}
+                        <div id="dropdown-1" className={`${!dropdown ? 'hidden' : ''} absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10`}>
+                            <div className="py-1">
+                                <button onClick={() => onDelete(proyecto)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 hover:cursor-pointer">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span>Eliminar proyecto</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
 
                 </div>
             </div>
