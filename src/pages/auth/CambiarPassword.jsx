@@ -7,6 +7,7 @@ const CambiarPassword = () => {
   const [password, setPassword] = useState('');
   const [passwordConfirmar, setPasswordConfirmar] = useState('');
   const [alerta, setAlerta] = useState({});
+  const [cargando, setCargando] = useState(true);
   const [confirmar, setConfirmar] = useState(false);
   const { token } = useParams();
 
@@ -21,6 +22,7 @@ const CambiarPassword = () => {
           error: true
         })
       }
+      setCargando(false);
     }
     verificarToken();
   }, [])
@@ -45,7 +47,7 @@ const CambiarPassword = () => {
     }
 
     try {
-      const {data} = await clienteAxios.put(`/usuarios/olvide-password/${token}`, {password});
+      const { data } = await clienteAxios.put(`/usuarios/olvide-password/${token}`, { password });
       setAlerta({
         msg: data.msg,
         error: false
@@ -192,38 +194,40 @@ const CambiarPassword = () => {
         {/* Form State */}
         <div id="formState">
           <div className="text-center mb-8">
-            {confirmar ? (
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                <svg
-                  className="h-8 w-8 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-3.586l4.293-4.293a1 1 0 011.414 0L9 12.414V11a6 6 0 017-5.937V5z"
-                  ></path>
-                </svg>
-              </div>
-            ) : (
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-                <svg
-                  className="h-8 w-8 text-red-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </div>
+            {!cargando && (
+              confirmar ? (
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                  <svg
+                    className="h-8 w-8 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-3.586l4.293-4.293a1 1 0 011.414 0L9 12.414V11a6 6 0 017-5.937V5z"
+                    ></path>
+                  </svg>
+                </div>
+              ) : (
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                  <svg
+                    className="h-8 w-8 text-red-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </div>
+              )
             )}
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               Recupera tu cuenta
